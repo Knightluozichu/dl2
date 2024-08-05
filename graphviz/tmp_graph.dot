@@ -1,0 +1,67 @@
+digraph g {
+4420656528 [label="y", color=orange, style=filled]
+4420656336 [label="Add", color=lightblue, style=filled, shape=box]
+4420656192 -> 4420656336
+4420656432 -> 4420656336
+4420656336 -> 4420656528
+4420656192 [label="", color=orange, style=filled]
+4420656432 [label="", color=orange, style=filled]
+4420656240 [label="Mul", color=lightblue, style=filled, shape=box]
+4420656288 -> 4420656240
+4420656384 -> 4420656240
+4420656240 -> 4420656432
+4420656288 [label="", color=orange, style=filled]
+4420656384 [label="", color=orange, style=filled]
+4420656144 [label="Pow", color=lightblue, style=filled, shape=box]
+4381929408 -> 4420656144
+4420656144 -> 4420656288
+4381929408 [label="x", color=orange, style=filled]
+4420656000 [label="Add", color=lightblue, style=filled, shape=box]
+4420655712 -> 4420656000
+4420656096 -> 4420656000
+4420656000 -> 4420656192
+4420655712 [label="", color=orange, style=filled]
+4420656096 [label="", color=orange, style=filled]
+4420655952 [label="Mul", color=lightblue, style=filled, shape=box]
+4420655808 -> 4420655952
+4420656048 -> 4420655952
+4420655952 -> 4420656096
+4420655808 [label="", color=orange, style=filled]
+4420656048 [label="", color=orange, style=filled]
+4420655664 [label="Pow", color=lightblue, style=filled, shape=box]
+4381929408 -> 4420655664
+4420655664 -> 4420655808
+4381929408 [label="x", color=orange, style=filled]
+4420654512 [label="Add", color=lightblue, style=filled, shape=box]
+4420651008 -> 4420654512
+4420655520 -> 4420654512
+4420654512 -> 4420655712
+4420651008 [label="", color=orange, style=filled]
+4420655520 [label="", color=orange, style=filled]
+4420654848 [label="Mul", color=lightblue, style=filled, shape=box]
+4420653744 -> 4420654848
+4420654368 -> 4420654848
+4420654848 -> 4420655520
+4420653744 [label="", color=orange, style=filled]
+4420654368 [label="", color=orange, style=filled]
+4416329184 [label="Pow", color=lightblue, style=filled, shape=box]
+4381929408 -> 4416329184
+4416329184 -> 4420653744
+4381929408 [label="x", color=orange, style=filled]
+4420655568 [label="Add", color=lightblue, style=filled, shape=box]
+4420655328 -> 4420655568
+4420654896 -> 4420655568
+4420655568 -> 4420651008
+4420655328 [label="", color=orange, style=filled]
+4420654896 [label="", color=orange, style=filled]
+4416246784 [label="Mul", color=lightblue, style=filled, shape=box]
+4420653312 -> 4416246784
+4420651392 -> 4416246784
+4416246784 -> 4420655328
+4420653312 [label="", color=orange, style=filled]
+4420651392 [label="", color=orange, style=filled]
+4416324672 [label="Pow", color=lightblue, style=filled, shape=box]
+4381929408 -> 4416324672
+4416324672 -> 4420653312
+4381929408 [label="x", color=orange, style=filled]
+}
