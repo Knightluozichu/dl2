@@ -26,7 +26,7 @@ gx = x.grad
 gx.name = 'gx' + str(iters+1)
 plot_dot_graph(gx, verbose=True, to_file='tanh_iters_7.png')
 
-# %%
+# %% steps36.py
 if "__file__" in globals():
     import os, sys
     sys.path.append(os.path.join(os.path.dirname(__file__),'..'))
