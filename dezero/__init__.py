@@ -19,6 +19,6 @@ else:
     from dezero.core import as_variable
     from dezero.core import setup_variable
     from dezero.core import Config
-    from dezero.functions import *
+    import dezero.functions
 
 setup_variable()

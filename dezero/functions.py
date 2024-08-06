@@ -1,5 +1,11 @@
+from string import ascii_lowercase
+from turtle import backward, forward
+import dezero
 import numpy as np
-from dezero.core import Function
+from dezero import Function
+from dezero import as_variable, as_array
+from dezero import Variable
+import utils
 
 
 class Sin(Function):
@@ -43,3 +49,176 @@ class Tanh(Function):
     
 def tanh(x):
     return Tanh()(x)
+
+class Exp(Function):
+    def forward(self,x):
+        y = np.exp(x)
+        return y
+    
+    def backward(self, gys):
+        y = self.outputs[0]() #weakref
+        gx = gys * y
+        return gx
+    
+def exp(x):
+    return Exp()(x)
+
+class Log(Function):
+    def forward(self, x):
+        y = np.log(x)
+        return y
+    
+    def backward(self, gys):
+        x, = self.inputs
+        gx = gys / x
+        return gx
+    
+def log(x):
+    return Log()(x)
+
+# 张量操作：reshape/ transpose / get_item / expand_dims / flatten / sum_to / broadcast_to
+
+class Reshape(Function):
+    def __init__(self,shape:tuple):
+        self.shape = shape
+
+    def forward(self, x):
+        self.x_shape = x.shape
+        y = x.reshape(self.shape)
+        return y
+    
+    def backward(self, gys):
+        return reshape(gys, self.x_shape)
+
+def reshape(x:Variable, shape:tuple):
+    if x.shape == shape:
+        return as_variable(x)
+    return Reshape(shape)(x)
+
+class Transpose(Function):
+    def __init__(self,axes=None):
+        self.axes = axes
+
+    def forward(self, x):
+        y = x.transpose(self.axes)
+        return y
+    
+    def backward(self, gy):
+        if self.axes is None:
+            return transpose(gy)
+    
+        axes_len = len(self.axes)
+        inv_axes = tuple(np.argsort([ax % axes_len for ax in self.axes]))
+        return transpose(gy, inv_axes)
+        
+def transpose(x:Variable, axes=None):
+    return Transpose(axes)(x)
+
+
+class GetItem(Function):
+    def __init__(self, slices):
+        self.slices = slices
+
+    def forward(self, x):
+        y = x[self.slices]
+        return y
+    
+    def backward(self, gys):
+        x , = self.inputs
+        f = GetItemGrad(self.slices, x.shape)
+        return f(gys)
+    
+class GetItemGrad(Function):
+    def __init__(self,slices,in_shape):
+        self.slices = slices
+        self.in_shape = in_shape
+
+    def forward(self,gy):
+        xp = dezero.cuda.get_array_module(gy)
+        gx = xp.zeros(self.in_shape, dtype=gy.dtype)
+        
+        if xp in np:
+            np.add.at(gx, self.slices, gy)
+        else:
+            xp.scatter_add(gx, self.slices, gy)
+        return gx
+    
+    def backward(self, ggx):
+        return get_item(ggx, self.slices)
+    
+
+def get_item(x, slices):
+    return GetItem(slices)(x)
+
+
+def expand_dims(x, axis):
+    x = as_variable(x)
+    shape = list(x.shape)
+    shape.insert(axis, 1)
+    return reshape(x, tuple(shape))
+
+def flatten(x):
+    """将输入展平，不影响批处理大小"""
+    return reshape(x, (x.shape[0],-1))
+
+class Sum(Function):
+    def __init__(self, axis, keepdims):
+        self.axis = axis
+        self.keepdims = keepdims
+    
+    def forward(self, x):
+        self.x_shape = x.shape
+        y = x.sum(axis=self.axis, keepdims=self.keepdims)
+        return y
+    
+    def backward(self, gy):
+        gy = utils.reshape_sum_backward(gy, self.x_shape, self.axis, self.keepdims)
+        gx = broadcast_to(gy, self.x_shape)
+        return gx
+    
+
+def sum(x, axis=None, keepdims=False):
+    return Sum(axis, keepdims)(x)
+
+
+class SumTo(Function):
+    def __init__(self, shape):
+        self.shape = shape
+
+    def forward(self, x):
+        self.x_shape = x.shape
+        y = utils.sum_to(x, self.shape)
+        return y
+    
+    def backward(self, gy):
+        gx = broadcast_to(gy, self.x_shape)
+        return gx
+        
+def sum_to(x, shape):
+    if x.shape == shape:
+        return as_variable(x)
+    return SumTo(shape)(x)
+
+class BroadcastTo(Function):
+    def __init__(self, shape):
+        self.shape = shape
+
+    def forward(self, x):
+        self.x_shape = x.shape
+        y = np.broadcast_to(x, self.shape)
+        return y
+    
+    def backward(self, gy):
+        gx = sum_to(gy, self.x_shape)
+        return gx
+    
+def broadcast_to(x, shape):
+    if x.shape == shape:
+        return as_variable(x)
+    return BroadcastTo(shape)(x)
+
+def average(x, axis=None, keepdims=False):
+    x = as_variable(x)
+    y = sum(x, axis, keepdims)
+    return y / np.array(x.size).astype(y.dtype)
+
