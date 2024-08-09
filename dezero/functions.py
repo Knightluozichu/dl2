@@ -1,11 +1,9 @@
-from re import L
-from string import ascii_lowercase
-from turtle import backward, forward
 import dezero
 import numpy as np
 from dezero import Function
 from dezero import as_variable, as_array
 from dezero import Variable
+from dezero import cuda
 import utils
 
 
@@ -77,6 +75,26 @@ class Log(Function):
 def log(x):
     return Log()(x)
 
+class Clip(Function):
+    def __init__(self, x_min, x_max):
+        self.x_min = x_min
+        self.x_max = x_max
+
+    def forward(self, x):
+        xp = cuda.get_array_module(x)
+        y = xp.clip(x, self.x_min, self.x_max)
+        return y
+
+    def backward(self, gy):
+        x, = self.inputs
+        mask = (x.data >= self.x_min) * (x.data <= self.x_max)
+        gx = gy * mask
+        return gx
+
+
+def clip(x, x_min, x_max):
+    return Clip(x_min, x_max)(x)
+
 # 张量操作：reshape/ transpose / get_item / expand_dims / flatten / sum_to / broadcast_to
 
 class Reshape(Function):
@@ -137,8 +155,8 @@ class GetItemGrad(Function):
     def forward(self,gy):
         xp = dezero.cuda.get_array_module(gy)
         gx = xp.zeros(self.in_shape, dtype=gy.dtype)
-        
-        if xp in np:
+        # print(xp)
+        if xp is np:
             np.add.at(gx, self.slices, gy)
         else:
             xp.scatter_add(gx, self.slices, gy)

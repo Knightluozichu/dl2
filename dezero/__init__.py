@@ -1,3 +1,4 @@
+
 is_simple_core = False
 
 if is_simple_core:
@@ -24,5 +25,6 @@ else:
     import dezero.functions
     import dezero.layers
     from dezero.models import Model
+    import dezero.cuda 
 
 setup_variable()
