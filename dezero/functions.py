@@ -252,3 +252,16 @@ class MeanSquaredError(Function):
     
 def mean_squared_error(x0, x1):
     return MeanSquaredError()(x0, x1)
+
+def linear_simple(x, W, b=None):
+    t = matmul(x, W)
+    if b is None:
+        return t
+    y = t + b
+    t.data = None
+    return y
+
+def sigmoid_simple(x):
+    x = as_variable(x)
+    y = 1 / (1 + exp(-x))
+    return y
