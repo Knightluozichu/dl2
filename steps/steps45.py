@@ -92,3 +92,4 @@ for i in range(max_iter):
     if i % 1000 == 0:
         print(loss)
 
+
