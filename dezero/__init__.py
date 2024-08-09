@@ -12,6 +12,7 @@ if is_simple_core:
 
 else:
     from dezero.core import Variable
+    from dezero.core import Parameter
     from dezero.core import Function
     from dezero.core import using_config
     from dezero.core import no_grad
@@ -20,5 +21,6 @@ else:
     from dezero.core import setup_variable
     from dezero.core import Config
     import dezero.functions
+    import dezero.layers
 
 setup_variable()
