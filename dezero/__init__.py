@@ -27,5 +27,6 @@ else:
     from dezero.models import Model
     import dezero.cuda
     import dezero.datasets
+    import dezero.dataloaders
 
 setup_variable()
