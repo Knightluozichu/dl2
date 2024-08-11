@@ -25,6 +25,7 @@ else:
     import dezero.functions
     import dezero.layers
     from dezero.models import Model
-    import dezero.cuda 
+    import dezero.cuda
+    import dezero.datasets
 
 setup_variable()

@@ -1,3 +1,6 @@
+from turtle import forward
+
+from regex import F
 import dezero
 import numpy as np
 from dezero import Function
@@ -315,3 +318,83 @@ class Sigmoid(Function):
     
 def sigmoid(x):
     return Sigmoid()(x)
+
+class ReLU(Function):
+    def forward(self, x):
+        xp = cuda.get_array_module(x)
+        y = xp.maximum(x, 0.)
+        return y
+    
+    def backward(self, gy):
+        x, = self.inputs
+        mask = x.data > 0
+        gx = gy * mask
+        return gx
+    
+def relu(x):
+    return ReLU()(x)
+    
+
+class Softmax(Function):
+    def __init__(self, axis = 1):
+        self.axis = axis
+
+    def forward(self, x):
+        xp = cuda.get_array_module(x)
+        y = x - x.max(axis=self.axis, keepdims=True)
+        y = xp.exp(y)
+        y /= y.sum(axis=self.axis, keepdims=True)
+        return y
+    
+    def backward(self, gy):
+        y = self.outputs[0]()
+        gx = y * gy
+        sumdx = gx.sum(axis=self.axis, keepdims=True)
+        gx -= y * sumdx
+        return gx
+    
+def softmax(x, axis=1):
+    return Softmax(axis)(x)
+
+
+class LogSoftmax(Function):
+    def __init__(self, axis=1):
+        self.axis = axis
+
+    def forward(self, x):
+        log_z = utils.logsumexp(x, axis=self.axis, keepdims=True)
+        y = x - log_z
+        return y
+
+    def backward(self, gy):
+        gx = gy - exp(self.outputs[0]()) * gy.sum(axis=self.axis, keepdims=True)
+        return gx
+    
+def log_softmax(x, axis=1):
+    return LogSoftmax(axis)(x)
+
+
+class SoftmaxCrossEntropy(Function):
+    def forward(self, x, t):
+        N = x.shape[0]
+        log_z = utils.logsumexp(x, axis=1)
+        log_p = x - log_z
+        log_p = log_p[np.arange(N), t]
+        y = -log_p.sum() / np.float32(N)
+        return y
+    
+    def backward(self, gy):
+        x, t = self.inputs
+        N, CLS_NUM = x.shape
+
+        gy *= 1/N
+        y = softmax(x)
+
+        #convert to one-hot
+        xp = cuda.get_array_module(t.data)
+        t_onehot = xp.eye(CLS_NUM, dtype=t.dtype)[t.data]
+        y = (y - t_onehot) * gy
+        return y
+
+def softmax_cross_entropy(x, t):
+    return SoftmaxCrossEntropy()(x, t)
