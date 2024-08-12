@@ -28,5 +28,6 @@ else:
     import dezero.cuda
     import dezero.datasets
     import dezero.dataloaders
+    import dezero.transforms
 
 setup_variable()
